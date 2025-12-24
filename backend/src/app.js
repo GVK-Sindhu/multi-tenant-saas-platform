@@ -4,6 +4,8 @@ import pool from './config/db.js';
 import { env } from './config/env.js';
 import authRoutes from './routes/auth.routes.js';
 import tenantRoutes from './routes/tenant.routes.js';
+import userRoutes from './routes/user.routes.js';
+
 
 
 
@@ -22,6 +24,7 @@ app.use(express.json());
 
 app.use('/api/auth', authRoutes);
 app.use('/api/tenants', tenantRoutes);
+app.use('/api', userRoutes);
 
 
 // Root test route
