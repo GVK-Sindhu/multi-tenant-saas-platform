@@ -1,6 +1,9 @@
 import express from 'express';
 import cors from 'cors';
+import pool from './config/db.js';
 import { env } from './config/env.js';
+import authRoutes from './routes/auth.routes.js';
+
 
 const app = express();
 
@@ -15,12 +18,24 @@ app.use(
 // Body parser
 app.use(express.json());
 
+app.use('/api/auth', authRoutes);
+
 // Root test route
 app.get('/', (req, res) => {
   res.json({
     success: true,
     message: 'Backend API is running'
   });
+});
+
+// Health check (MANDATORY)
+app.get('/api/health', async (req, res) => {
+  try {
+    await pool.query('SELECT 1');
+    res.json({ status: 'ok', database: 'connected' });
+  } catch (err) {
+    res.status(500).json({ status: 'error', database: 'disconnected' });
+  }
 });
 
 export default app;
