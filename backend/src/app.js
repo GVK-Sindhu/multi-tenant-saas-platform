@@ -3,6 +3,8 @@ import cors from 'cors';
 import pool from './config/db.js';
 import { env } from './config/env.js';
 import authRoutes from './routes/auth.routes.js';
+import tenantRoutes from './routes/tenant.routes.js';
+
 
 
 const app = express();
@@ -19,6 +21,8 @@ app.use(
 app.use(express.json());
 
 app.use('/api/auth', authRoutes);
+app.use('/api/tenants', tenantRoutes);
+
 
 // Root test route
 app.get('/', (req, res) => {
