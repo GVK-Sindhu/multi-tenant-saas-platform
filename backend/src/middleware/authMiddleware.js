@@ -1,12 +1,12 @@
 import jwt from 'jsonwebtoken';
 
-export function authenticate(req, res, next) {
+const authMiddleware = (req, res, next) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return res.status(401).json({
       success: false,
-      message: 'Missing or invalid token'
+      message: 'Authorization token missing'
     });
   }
 
@@ -14,12 +14,27 @@ export function authenticate(req, res, next) {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded; // { userId, tenantId, role }
+
+    req.user = {
+      userId: decoded.userId,
+      tenantId: decoded.tenantId,   
+      role: decoded.role
+    };
+
+    if (!req.user.tenantId && req.user.role !== 'super_admin') {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid token payload'
+      });
+    }
+
     next();
   } catch (err) {
     return res.status(401).json({
       success: false,
-      message: 'Token expired or invalid'
+      message: 'Token invalid or expired'
     });
   }
-}
+};
+
+export default authMiddleware;

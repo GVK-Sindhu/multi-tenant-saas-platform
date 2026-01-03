@@ -1,7 +1,23 @@
--- UP
-CREATE TYPE user_role AS ENUM ('super_admin', 'tenant_admin', 'user');
+-- =====================================================
+-- USER ROLE ENUM (SAFE CREATION)
+-- =====================================================
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_type WHERE typname = 'user_role'
+    ) THEN
+        CREATE TYPE user_role AS ENUM (
+            'super_admin',
+            'tenant_admin',
+            'user'
+        );
+    END IF;
+END$$;
 
-CREATE TABLE users (
+-- =====================================================
+-- USERS TABLE
+-- =====================================================
+CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tenant_id UUID NULL,
     email VARCHAR(255) NOT NULL,
@@ -15,11 +31,19 @@ CREATE TABLE users (
     CONSTRAINT fk_user_tenant
         FOREIGN KEY (tenant_id)
         REFERENCES tenants(id)
-        ON DELETE CASCADE,
-
-    CONSTRAINT unique_email_per_tenant UNIQUE (tenant_id, email)
+        ON DELETE CASCADE
 );
 
--- DOWN
-DROP TABLE IF EXISTS users CASCADE;
-DROP TYPE IF EXISTS user_role;
+-- =====================================================
+-- UNIQUE CONSTRAINTS (POSTGRES SAFE)
+-- =====================================================
+
+-- One super admin email (no tenant)
+CREATE UNIQUE INDEX IF NOT EXISTS unique_super_admin_email
+ON users(email)
+WHERE tenant_id IS NULL;
+
+-- Unique email per tenant
+CREATE UNIQUE INDEX IF NOT EXISTS unique_user_per_tenant
+ON users(tenant_id, email)
+WHERE tenant_id IS NOT NULL;

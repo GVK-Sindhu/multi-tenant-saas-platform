@@ -1,8 +1,9 @@
 import express from 'express';
 import pool from '../config/db.js';
-import { authenticate } from '../middleware/authMiddleware.js';
+import authMiddleware from '../middleware/authMiddleware.js';
 import { tenantIsolation } from '../middleware/tenantMiddleware.js';
 import { authorizeRoles } from '../middleware/roleMiddleware.js';
+import userRouter from './user.routes.js';
 
 const router = express.Router();
 
@@ -11,7 +12,7 @@ const router = express.Router();
  */
 router.get(
   '/:tenantId',
-  authenticate,
+  authMiddleware,
   tenantIsolation,
   async (req, res) => {
     const { tenantId } = req.params;
@@ -77,7 +78,7 @@ router.get(
  */
 router.put(
   '/:tenantId',
-  authenticate,
+  authMiddleware,
   tenantIsolation,
   authorizeRoles('tenant_admin', 'super_admin'),
   async (req, res) => {
@@ -140,7 +141,7 @@ router.put(
  */
 router.get(
   '/',
-  authenticate,
+  authMiddleware,
   authorizeRoles('super_admin'),
   async (req, res) => {
     const { page = 1, limit = 10 } = req.query;
@@ -183,5 +184,6 @@ router.get(
     }
   }
 );
+router.use('/:tenantId/users', userRouter);
 
 export default router;

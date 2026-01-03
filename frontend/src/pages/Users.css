@@ -1,0 +1,45 @@
+.users-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.users-table {
+  width: 100%;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+}
+
+.users-table th,
+.users-table td {
+  padding: 14px 18px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.users-table th {
+  background: #f9fafb;
+  text-align: left;
+}
+
+.badge {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.badge.admin {
+  background: #ede9fe;
+  color: #6d28d9;
+}
+
+.badge.user {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.badge.active {
+  background: #dcfce7;
+  color: #16a34a;
+}

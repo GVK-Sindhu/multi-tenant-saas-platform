@@ -12,13 +12,12 @@ import taskRoutes from './routes/task.routes.js';
 
 const app = express();
 
-// CORS (Docker-safe)
-app.use(
-  cors({
-    origin: env.FRONTEND_URL,
-    credentials: true
-  })
-);
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 
 // Body parser
 app.use(express.json());

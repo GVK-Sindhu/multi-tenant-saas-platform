@@ -1,16 +1,17 @@
--- SUPER ADMIN (tenant_id = NULL)
-INSERT INTO users (id, tenant_id, email, password_hash, full_name, role)
-VALUES (
-    gen_random_uuid(),
-    NULL,
-    'superadmin@system.com',
-    '$2b$10$V9V5XbJvV8Jv3QjELrJH2u8s5l7S6b1kz5m5K5h8zJfXg9Eo3Ywxy', -- Admin@123
-    'System Super Admin',
-    'super_admin'
-);
-
--- DEMO TENANT
-INSERT INTO tenants (id, name, subdomain, status, subscription_plan, max_users, max_projects)
+-- =====================================================
+-- TENANT
+-- =====================================================
+INSERT INTO tenants (
+    id,
+    name,
+    subdomain,
+    status,
+    subscription_plan,
+    max_users,
+    max_projects,
+    created_at,
+    updated_at
+)
 VALUES (
     gen_random_uuid(),
     'Demo Company',
@@ -18,61 +19,259 @@ VALUES (
     'active',
     'pro',
     25,
-    15
+    15,
+    NOW(),
+    NOW()
+)
+ON CONFLICT (subdomain) DO NOTHING;
+
+-- =====================================================
+-- SUPER ADMIN (NO TENANT)
+-- Password: Admin@123
+-- =====================================================
+INSERT INTO users (
+    id,
+    tenant_id,
+    email,
+    password_hash,
+    full_name,
+    role,
+    is_active,
+    created_at,
+    updated_at
+)
+VALUES (
+    gen_random_uuid(),
+    NULL,
+    'superadmin@system.com',
+    '$2a$10$sTJF6v2Y58gyuhCCsQxJlO4yj5VDI9swDh5XT6qo4AjXuIvbamM2e',
+    'System Super Admin',
+    'super_admin',
+    true,
+    NOW(),
+    NOW()
 );
 
+-- =====================================================
 -- TENANT ADMIN
-INSERT INTO users (id, tenant_id, email, password_hash, full_name, role)
+-- Password: Demo@123
+-- =====================================================
+INSERT INTO users (
+    id,
+    tenant_id,
+    email,
+    password_hash,
+    full_name,
+    role,
+    is_active,
+    created_at,
+    updated_at
+)
 SELECT
     gen_random_uuid(),
     t.id,
     'admin@demo.com',
-    '$2b$10$0MZ1QZL8D1A0lP4i8sFZKONj.fZ1Qxyy9VZ8kQ3PjR7N2N1R6zGZy', -- Demo@123
+    '$2a$10$lKLpaIsM.TpMqZr4I13eEO84ROHeHNcOaeHueRtDhAetcFGrMZa9O',
     'Demo Admin',
-    'tenant_admin'
-FROM tenants t WHERE t.subdomain = 'demo';
+    'tenant_admin',
+    true,
+    NOW(),
+    NOW()
+FROM tenants t
+WHERE t.subdomain = 'demo';
 
+-- =====================================================
 -- REGULAR USERS
-INSERT INTO users (id, tenant_id, email, password_hash, full_name, role)
-SELECT gen_random_uuid(), t.id, 'user1@demo.com',
-'$2b$10$Y2A8Uo8j4l3FJmQjKkE6tOe5tZP5xY6wL7yF2mXU3vXn9m2x8w2Wy',
-'Demo User One', 'user'
-FROM tenants t WHERE t.subdomain = 'demo';
+-- Password: User@123
+-- =====================================================
+INSERT INTO users (
+    id,
+    tenant_id,
+    email,
+    password_hash,
+    full_name,
+    role,
+    is_active,
+    created_at,
+    updated_at
+)
+SELECT
+    gen_random_uuid(),
+    t.id,
+    'user1@demo.com',
+    '$2a$10$aig7jvFZaJZgLT5LT/lNx.1zclzZwl3rO5r1RzUdsCeg2sNWj2WCO',
+    'Demo User One',
+    'user',
+    true,
+    NOW(),
+    NOW()
+FROM tenants t
+WHERE t.subdomain = 'demo';
 
-INSERT INTO users (id, tenant_id, email, password_hash, full_name, role)
-SELECT gen_random_uuid(), t.id, 'user2@demo.com',
-'$2b$10$Y2A8Uo8j4l3FJmQjKkE6tOe5tZP5xY6wL7yF2mXU3vXn9m2x8w2Wy',
-'Demo User Two', 'user'
-FROM tenants t WHERE t.subdomain = 'demo';
+INSERT INTO users (
+    id,
+    tenant_id,
+    email,
+    password_hash,
+    full_name,
+    role,
+    is_active,
+    created_at,
+    updated_at
+)
+SELECT
+    gen_random_uuid(),
+    t.id,
+    'user2@demo.com',
+    '$2a$10$aig7jvFZaJZgLT5LT/lNx.1zclzZwl3rO5r1RzUdsCeg2sNWj2WCO',
+    'Demo User Two',
+    'user',
+    true,
+    NOW(),
+    NOW()
+FROM tenants t
+WHERE t.subdomain = 'demo';
 
+-- =====================================================
 -- PROJECTS
-INSERT INTO projects (id, tenant_id, name, description, created_by)
-SELECT gen_random_uuid(), t.id, 'Project Alpha', 'First demo project', u.id
-FROM tenants t, users u
-WHERE t.subdomain = 'demo' AND u.role = 'tenant_admin';
+-- =====================================================
+INSERT INTO projects (
+    id,
+    tenant_id,
+    name,
+    description,
+    created_by,
+    created_at,
+    updated_at
+)
+SELECT
+    gen_random_uuid(),
+    t.id,
+    'Project Alpha',
+    'First demo project',
+    u.id,
+    NOW(),
+    NOW()
+FROM tenants t
+JOIN users u ON u.tenant_id = t.id AND u.role = 'tenant_admin'
+WHERE t.subdomain = 'demo'
+LIMIT 1;
 
-INSERT INTO projects (id, tenant_id, name, description, created_by)
-SELECT gen_random_uuid(), t.id, 'Project Beta', 'Second demo project', u.id
-FROM tenants t, users u
-WHERE t.subdomain = 'demo' AND u.role = 'tenant_admin';
+INSERT INTO projects (
+    id,
+    tenant_id,
+    name,
+    description,
+    created_by,
+    created_at,
+    updated_at
+)
+SELECT
+    gen_random_uuid(),
+    t.id,
+    'Project Beta',
+    'Second demo project',
+    u.id,
+    NOW(),
+    NOW()
+FROM tenants t
+JOIN users u ON u.tenant_id = t.id AND u.role = 'tenant_admin'
+WHERE t.subdomain = 'demo'
+LIMIT 1;
 
+-- =====================================================
 -- TASKS
-INSERT INTO tasks (id, project_id, tenant_id, title, status, priority)
-SELECT gen_random_uuid(), p.id, p.tenant_id, 'Initial Setup', 'todo', 'high'
-FROM projects p LIMIT 1;
+-- =====================================================
+INSERT INTO tasks (
+    id,
+    project_id,
+    tenant_id,
+    title,
+    status,
+    priority,
+    created_at,
+    updated_at
+)
+SELECT
+    gen_random_uuid(),
+    p.id,
+    p.tenant_id,
+    'Initial Setup',
+    'todo',
+    'high',
+    NOW(),
+    NOW()
+FROM projects p
+WHERE p.name = 'Project Alpha';
 
-INSERT INTO tasks (id, project_id, tenant_id, title)
-SELECT gen_random_uuid(), p.id, p.tenant_id, 'Design Database Schema'
-FROM projects p LIMIT 1;
+INSERT INTO tasks (
+    id,
+    project_id,
+    tenant_id,
+    title,
+    created_at,
+    updated_at
+)
+SELECT
+    gen_random_uuid(),
+    p.id,
+    p.tenant_id,
+    'Design Database Schema',
+    NOW(),
+    NOW()
+FROM projects p
+WHERE p.name = 'Project Alpha';
 
-INSERT INTO tasks (id, project_id, tenant_id, title)
-SELECT gen_random_uuid(), p.id, p.tenant_id, 'Implement Auth'
-FROM projects p OFFSET 1 LIMIT 1;
+INSERT INTO tasks (
+    id,
+    project_id,
+    tenant_id,
+    title,
+    created_at,
+    updated_at
+)
+SELECT
+    gen_random_uuid(),
+    p.id,
+    p.tenant_id,
+    'Implement Auth',
+    NOW(),
+    NOW()
+FROM projects p
+WHERE p.name = 'Project Beta';
 
-INSERT INTO tasks (id, project_id, tenant_id, title)
-SELECT gen_random_uuid(), p.id, p.tenant_id, 'Create APIs'
-FROM projects p OFFSET 1 LIMIT 1;
+INSERT INTO tasks (
+    id,
+    project_id,
+    tenant_id,
+    title,
+    created_at,
+    updated_at
+)
+SELECT
+    gen_random_uuid(),
+    p.id,
+    p.tenant_id,
+    'Create APIs',
+    NOW(),
+    NOW()
+FROM projects p
+WHERE p.name = 'Project Beta';
 
-INSERT INTO tasks (id, project_id, tenant_id, title)
-SELECT gen_random_uuid(), p.id, p.tenant_id, 'Frontend Integration'
-FROM projects p OFFSET 1 LIMIT 1;
+INSERT INTO tasks (
+    id,
+    project_id,
+    tenant_id,
+    title,
+    created_at,
+    updated_at
+)
+SELECT
+    gen_random_uuid(),
+    p.id,
+    p.tenant_id,
+    'Frontend Integration',
+    NOW(),
+    NOW()
+FROM projects p
+WHERE p.name = 'Project Beta';
